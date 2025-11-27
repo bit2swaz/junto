@@ -55,3 +55,26 @@ func (s *service) GetUserByEmail(ctx context.Context, email string) (*User, erro
 	}
 	return user, nil
 }
+
+func (s *service) GetUserByID(ctx context.Context, id int64) (*User, error) {
+	query := `
+		SELECT id, email, password_hash, created_at, couple_id
+		FROM users
+		WHERE id = $1
+	`
+	user := &User{}
+	err := s.db.QueryRow(ctx, query, id).Scan(
+		&user.ID,
+		&user.Email,
+		&user.PasswordHash,
+		&user.CreatedAt,
+		&user.CoupleID,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}

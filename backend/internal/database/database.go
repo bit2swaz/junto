@@ -19,6 +19,7 @@ type Service interface {
 	GetRedis() *redis.Client
 	CreateUser(ctx context.Context, email, passwordHash string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetUserByID(ctx context.Context, id int64) (*User, error)
 	CreateCouple(ctx context.Context, user1ID, user2ID int64) (*Couple, error)
 }
 
