@@ -112,6 +112,10 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch user", http.StatusInternalServerError)
 		return
 	}
+	if user == nil {
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	}
 
 	// 2. Upgrade
 	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{
@@ -149,7 +153,7 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		// Handle messages
 		if msgType, ok := msg["type"].(string); ok {
 			switch msgType {
-			case "move":
+			case "move", "TOUCH_START", "TOUCH_END":
 				if user.CoupleID != nil {
 					h.BroadcastToCouple(*user.CoupleID, msg, userID)
 				}

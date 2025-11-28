@@ -23,6 +23,7 @@ func main() {
 
 	authHandler := &handlers.AuthHandler{DB: db}
 	coupleHandler := &handlers.CoupleHandler{DB: db}
+	vaultHandler := &handlers.VaultHandler{DB: db}
 	hub := websocket.NewHub(db)
 
 	r := chi.NewRouter()
@@ -49,6 +50,8 @@ func main() {
 		r.Get("/me", authHandler.Me)
 		r.Post("/couples/code", coupleHandler.GeneratePairingCode)
 		r.Post("/couples/link", coupleHandler.LinkPartner)
+		r.Post("/vault", vaultHandler.AddToVault)
+		r.Get("/vault", vaultHandler.GetVaultItems)
 		r.Get("/ws", hub.HandleWebSocket)
 	})
 

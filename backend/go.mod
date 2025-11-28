@@ -13,6 +13,8 @@ require (
 	golang.org/x/crypto v0.45.0
 )
 
+require github.com/google/uuid v1.6.0
+
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

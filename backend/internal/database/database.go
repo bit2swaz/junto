@@ -21,6 +21,8 @@ type Service interface {
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id int64) (*User, error)
 	CreateCouple(ctx context.Context, user1ID, user2ID int64) (*Couple, error)
+	CreateVaultItem(ctx context.Context, coupleID, userID int64, content string, unlockAt time.Time) (*VaultItem, error)
+	GetVaultItems(ctx context.Context, coupleID, userID int64) ([]VaultItem, error)
 }
 
 type service struct {

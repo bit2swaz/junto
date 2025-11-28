@@ -28,6 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setUser(null);
+    router.push("/login");
+  };
+
   const fetchUser = async (authToken: string) => {
     try {
       const res = await fetch("http://localhost:8080/me", {
@@ -36,6 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const userData = await res.json();
         setUser(userData);
+      } else if (res.status === 401 || res.status === 404) {
+        logout();
       }
     } catch (err) {
       console.error(err);
@@ -57,13 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(newToken);
     fetchUser(newToken);
     router.push("/");
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-    router.push("/login");
   };
 
   return (

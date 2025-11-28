@@ -19,6 +19,9 @@ export default function RoomCanvas() {
   const movementVector = useRef({ x: 0, y: 0 });
   const speed = 2;
 
+  // Touch/Haptic state
+  const [isPartnerTouching, setIsPartnerTouching] = useState(false);
+
   // Throttle sending updates to 30 times per second (~33ms)
   const sendMoveUpdate = useMemo(
     () =>
@@ -36,10 +39,33 @@ export default function RoomCanvas() {
         if (!displayedPartnerPos.current) {
           displayedPartnerPos.current = { x: msg.x, y: msg.y };
         }
+      } else if (msg.type === 'TOUCH_START') {
+        setIsPartnerTouching(true);
+      } else if (msg.type === 'TOUCH_END') {
+        setIsPartnerTouching(false);
       }
     });
     return unsubscribe;
   }, [subscribe]);
+
+  // Haptic feedback loop
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPartnerTouching) {
+      const vibrate = () => {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate([100, 50]);
+        }
+      };
+      // Initial trigger
+      vibrate();
+      // Loop
+      interval = setInterval(vibrate, 150);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPartnerTouching]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -96,6 +122,18 @@ export default function RoomCanvas() {
       sendMoveUpdate.cancel();
     };
   }, [isConnected, sendMoveUpdate]);
+
+  const handleCanvasPointerDown = () => {
+    if (isConnected) {
+      sendMessage({ type: 'TOUCH_START' });
+    }
+  };
+
+  const handleCanvasPointerUp = () => {
+    if (isConnected) {
+      sendMessage({ type: 'TOUCH_END' });
+    }
+  };
 
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     isDragging.current = true;
@@ -164,11 +202,17 @@ export default function RoomCanvas() {
 
   return (
     <div className="relative w-full max-w-[300px] mx-auto">
+      {isPartnerTouching && (
+        <div className="fixed inset-0 z-50 pointer-events-none bg-gradient-to-r from-pink-500/30 to-orange-500/30 animate-pulse" />
+      )}
       <canvas
         ref={canvasRef}
         width={300}
         height={300}
-        className="border border-gray-300 rounded-lg bg-white w-full"
+        className="border border-gray-300 rounded-lg bg-white w-full touch-none"
+        onPointerDown={handleCanvasPointerDown}
+        onPointerUp={handleCanvasPointerUp}
+        onPointerLeave={handleCanvasPointerUp}
       />
       
       {/* Virtual Joystick Overlay */}

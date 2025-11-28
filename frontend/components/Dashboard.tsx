@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import RoomCanvas from "./RoomCanvas";
+import Vault from "./Vault";
 
 export default function Dashboard() {
   const { user, token, refreshUser } = useAuth();
@@ -45,8 +46,13 @@ export default function Dashboard() {
 
   if (user.couple_id) {
     return (
-      <div className="h-[calc(100vh-100px)]">
-        <RoomCanvas />
+      <div className="h-[calc(100vh-100px)] flex flex-col md:flex-row gap-4 p-4">
+        <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-lg">
+          <RoomCanvas />
+        </div>
+        <div className="w-full md:w-96">
+          <Vault />
+        </div>
       </div>
     );
   }
